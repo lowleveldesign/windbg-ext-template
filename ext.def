@@ -1,0 +1,7 @@
+EXPORTS
+    DebugExtensionNotify
+    DebugExtensionInitialize
+    DebugExtensionUninitialize
+
+    hello_world
+    hello_world2
