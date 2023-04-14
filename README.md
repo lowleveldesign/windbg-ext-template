@@ -23,7 +23,7 @@ From now, our options are endless. Check the [available interfaces](https://www.
 
 ## Building
 
-Make sure you have C++ tools and Windows SDK installed. Then call: `dotnet build`.
+Make sure you have C++ tools and Windows SDK installed (you may need to update paths in the `.vscode\c_cpp_properties.json` if you're using Visual Studio Code). Then call: `dotnet build`.
 
 Although the managed part could be compiled for any CPU, the native bootstrapper is either 64 or 32-bit. To explicitly set the bitness, specify the runtime identifier in the build command, for example, `dotnet build --runtime=win-x86 --no-self-contained` to build a 32-bit extension.
 
