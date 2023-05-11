@@ -2,6 +2,13 @@
 
 This repository contains code for a simple WinDbg extension. It implements two extension methods (`hello_world`, `hello_world2`) to prove that the idea works.
 
+There are **two versions available**:
+
+- the **cswin32** folder contains code based on the [Microsoft.Windows.CsWin32](https://www.nuget.org/packages/Microsoft.Windows.CsWin32) package
+- the **dbgx** folder contains code based on the [Microsoft.Debugging.Platform.DbgX](https://www.nuget.org/packages/Microsoft.Debugging.Platform.DbgX) package
+
+The former is more lightweight and runs on the latest versions of .NET. The latter requires a specific .NET version (matching the NuGet package) and has more dependencies. However, the exported PInvoke bindings are more polished. The choice is yours :)
+
 ## How it works
 
 The [ext.cpp](blob/main/ext.cpp) file contains the C++ code to load .NET runtime into the WinDbg process. The code is based on [an excellent sample](https://github.com/dotnet/samples/tree/main/core/hosting) from the [dotnet samples repository](https://github.com/dotnet/samples). Each extension method that WinDbg accepts must have the following signature:
@@ -10,7 +17,7 @@ The [ext.cpp](blob/main/ext.cpp) file contains the C++ code to load .NET runtime
 HRESULT ext_method(IDebugClient* client, LPCSTR args)
 ```
 
-`IDebugClient` is one of the [many COM interfaces](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dbgeng/) we use to communicate with the debug engine (dbgeng). In the past, accessing those interfaces from the managed world was complicated. Some of them were available in the [clrmd](https://github.com/microsoft/clrmd/tree/main/src/Microsoft.Diagnostics.Runtime/src/DbgEng) project, but in a hard-to-consume form. Thanks to the [Microsoft.Debugging.Platform.DbgX nuget package](https://www.nuget.org/packages/Microsoft.Debugging.Platform.DbgX), we can now access them as any other COM objects. The Runtime-callable wrappers perform all the necessary actions to wrap and query the native COM objects. For example, to print something on the WinDbg output, we may cast the `IDebugClient` instance to `IDebugControl7` and call the `OutputWide` method:
+`IDebugClient` is one of the [many COM interfaces](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dbgeng/) we use to communicate with the debug engine (dbgeng). In the past, accessing those interfaces from the managed world was complicated. Some of them were available in the [clrmd](https://github.com/microsoft/clrmd/tree/main/src/Microsoft.Diagnostics.Runtime/src/DbgEng) project, but in a hard-to-consume form. Thanks to the NuGet packages mentioned before, we can now access them as any other COM objects. The Runtime-callable wrappers perform all the necessary actions to wrap and query the native COM objects. For example, to print something on the WinDbg output, we may cast the `IDebugClient` instance to `IDebugControl7` and call the `OutputWide` method:
 
 ```csharp
 public static HRESULT HelloWorld(IDebugClient client, string args) {
@@ -19,7 +26,7 @@ public static HRESULT HelloWorld(IDebugClient client, string args) {
 }
 ```
 
-From now, our options are endless. Check the [available interfaces](https://www.fuget.org/packages/Microsoft.Debugging.Platform.DbgX/latest/lib/net6.0-windows10.0.17763/DbgX.dll/WindowsDebugger.DbgEng) and [dbgeng help](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dbgeng/) to learn more.
+From now, our options are endless. Check the [dbgeng help](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dbgeng/) to learn more.
 
 ## Building
 
@@ -103,8 +110,6 @@ EXPORTS
 Then, after loading the bootstrapper dll, launch your method with the `!my_awesome_extension_method` command.
 
 ## Things to improve
-
-The extension requires only a small subset of the DbgX NuGet package. Unfortunately, the package source code is unavailable so we need to import all the dependencies, unnecessarily consuming disk space. I hope to improve that one day..
 
 Adding a new method is a copy-paste exercise. I feel that it could be done better with some code-generation technique :)
 

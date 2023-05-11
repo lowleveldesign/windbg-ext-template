@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "name": "AMD64",
+            "includePath": [
+                "c:/Program Files/dotnet/packs/Microsoft.NETCore.App.Host.win-x64/7.0.5/runtimes/win-x64/native"
+            ],
+            "defines": [ "UNICODE" ],
+            "intelliSenseMode": "windows-msvc-x64",
+            "compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.35.32215/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++20"
+        },
+        {
+            "name": "x86",
+            "includePath": [
+                "c:/Program Files/dotnet/packs/Microsoft.NETCore.App.Host.win-x86/7.0.5/runtimes/win-x86/native"
+            ],
+            "defines": [ "UNICODE" ],
+            "intelliSenseMode": "windows-msvc-x64",
+            "compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.35.32215/bin/Hostx86/x86/cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++20"
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,9 @@
+// classes
+IDebugClient
+IDebugControl7
+
+// functions
+
+// constants
+HRESULT
+S_OK

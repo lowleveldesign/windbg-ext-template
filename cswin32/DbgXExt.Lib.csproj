@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <Platforms>AnyCPU;x86;x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CompilerPaths" Version="[1.0.2, )" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.2.206-beta">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Native part compilation -->
+  <PropertyGroup>
+    <NativeOutputName>dbgxext</NativeOutputName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <NativeSource Include="ext.cpp" />
+  </ItemGroup>
+
+  <Target Name="PrepareForNativeBuild">
+    <PropertyGroup>
+      <SourceFiles>@(NativeSource-> '"%(RootDir)%(Directory)%(Filename)%(Extension)"', ' ')</SourceFiles>
+      <CurrProjRuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</CurrProjRuntimeIdentifier>
+      <CurrProjRuntimeIdentifier Condition=" '$(RuntimeIdentifier)' != '' ">$(RuntimeIdentifier)</CurrProjRuntimeIdentifier>
+      <NetHostDir>$(NetCoreTargetingPackRoot)/Microsoft.NETCore.App.Host.$(CurrProjRuntimeIdentifier)/$(BundledNETCoreAppPackageVersion)/runtimes/$(CurrProjRuntimeIdentifier)/native</NetHostDir>
+      <NetHostName>nethost.dll</NetHostName>
+      <MSVCPlatform>x64</MSVCPlatform>
+      <MSVCPlatform Condition="$(CurrProjRuntimeIdentifier.Contains('x86'))">x86</MSVCPlatform>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="BuildNativeProjectWindows" AfterTargets="Build" DependsOnTargets="PrepareForNativeBuild;MSVCFindCompilerPaths">
+    <PropertyGroup>
+      <IncPaths>@(MSVCIncludePaths-> '/I "%(RootDir)%(Directory)%(Filename)"', ' ')</IncPaths>
+      <IncPaths>$(IncPaths) /I inc /I "$(NetHostDir)"</IncPaths>
+      <CompilerOptimizationFlags>/Od</CompilerOptimizationFlags>
+      <CompilerOptimizationFlags Condition=" '$(Configuration)' == 'Release' ">/O2</CompilerOptimizationFlags>
+      <CompilerArgs>$(CompilerOptimizationFlags) /EHsc /GS /sdl /W4 /WX /Zi /std:c++20 /LD</CompilerArgs>
+      <PreprocessorDefines>/D WINDOWS /D UNICODE</PreprocessorDefines>
+      <LibPaths>@(MSVCLibPaths-> '/LIBPATH:"%(RootDir)%(Directory)%(Filename)"', ' ')</LibPaths>
+      <LibPaths>$(LibPaths) "$(NetHostDir)\nethost.lib"</LibPaths>
+      <CurrProjOutputPath>$([System.IO.Path]::GetFullPath($(OutputPath)))</CurrProjOutputPath>
+    </PropertyGroup>
+
+    <Message Importance="high" Text="Path = $(CurrProjOutputPath)" />
+
+    <Exec Command="&quot;$(MSVCCompilerPath)&quot; $(SourceFiles) $(IncPaths) $(PreprocessorDefines) $(CompilerArgs) /link $(LibPaths) /def:../ext.def /out:&quot;$(CurrProjOutputPath)$(NativeOutputName).dll&quot;" WorkingDirectory="obj" ConsoleToMsBuild="true" />
+
+    <Copy SourceFiles="$(NetHostDir)/$(NetHostName)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="True" />
+  </Target>
+
+</Project>
